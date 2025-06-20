@@ -55,6 +55,15 @@ def main():
         "categories": {}
     }
 
+    # Database setup
+    database = "recipes.db"
+    conn = create_connection(database)
+    if conn is not None:
+        create_table(conn)
+    else:
+        print("Error! Cannot create the database connection.")
+        return
+
     # Get 5 categories
     categories = fetch_categories(5)
     print(f"Selected {len(categories)} categories: {', '.join(categories)}")
@@ -77,15 +86,23 @@ def main():
             # Get full recipe details
             recipe_details = fetch_recipe_details(recipe_id)
             if recipe_details:
+                # Add to JSON structure
                 all_recipes["categories"][category].append(recipe_details)
                 all_recipes["metadata"]["total_recipes"] += 1
 
-    # Save the collected data
+                # Insert into database
+                insert_recipe(conn, recipe_details)
+
+    # Save the collected data to JSON
     output_filename = f"limited_themealdb_recipes_{datetime.now().strftime('%Y%m%d')}.json"
     save_to_json(all_recipes, output_filename)
 
+    # Close database connection
+    conn.close()
+    print("Database connection closed")
+
     print(
-        f"\nCompleted! Saved {all_recipes['metadata']['total_recipes']} recipes (2 each from {len(categories)} categories) to {output_filename}")
+        f"\nCompleted! Saved {all_recipes['metadata']['total_recipes']} recipes (2 each from {len(categories)} categories) to both JSON and database")
 
 
 import sqlite3
@@ -193,39 +210,6 @@ def insert_recipe(conn, recipe_data):
     except Error as e:
         print(f"Error inserting recipe {recipe_data['idMeal']}: {e}")
     return None
-
-
-def setup_db():
-    # Database setup
-    database = "recipes.db"
-    conn = create_connection(database)
-
-    if conn is not None:
-        create_table(conn)
-
-        # Example recipe IDs - you can modify this list
-        recipe_ids = [
-            "52772",  # Teriyaki Chicken Casserole
-            "52874",  # Beef and Oyster pie
-            "52928",  # Toad In The Hole
-            "53013",  # Big Mac
-            "52977"  # Corba (Turkish soup)
-        ]
-
-        # Fetch and store each recipe
-        for recipe_id in recipe_ids:
-            recipe_data = fetch_recipe_details(recipe_id)
-            if recipe_data:
-                insert_recipe(conn, recipe_data)
-
-        conn.close()
-        print("Database connection closed")
-    else:
-        print("Error! Cannot create the database connection.")
-
-
-import xml.etree.ElementTree as ET
-from fractions import Fraction
 
 import xml.etree.ElementTree as ET
 from fractions import Fraction
@@ -431,7 +415,6 @@ def transform_to_html(xml_file, xslt_file, output_html):
 # Add this at the end of your __main__ block:
 if __name__ == "__main__":
     main()
-    setup_db()
     print_recipes("recipes.db")
     export_to_xml("recipes.db", "recipes.xml")  # Add this line
     transform_to_html("recipes.xml", "recipes.xslt", "recipes.html")  # Add this line
