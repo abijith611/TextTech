@@ -232,20 +232,81 @@ from fractions import Fraction
 
 
 def parse_measurement(measure_str):
-    """Separate quantity and unit from measurement string"""
-    try:
-        # Try to parse fraction/number at start of string
-        parts = measure_str.split(maxsplit=1)
-        if len(parts) > 0:
-            try:
-                quantity = str(Fraction(parts[0]))
-                unit = parts[1] if len(parts) > 1 else ""
-                return quantity, unit
-            except (ValueError, TypeError):
-                return "", measure_str
-        return "", measure_str
-    except AttributeError:
-        return "", measure_str
+    """Separate quantity, unit, and item from measurement string"""
+    measure_str = measure_str.strip()
+    if not measure_str:
+        return "", "", ""
+
+    # Common unit abbreviations and their full forms
+    unit_mapping = {
+        'tbs': 'tablespoon', 'tbsp': 'tablespoon', 'tablespoons': 'tablespoon',
+        'tsp': 'teaspoon', 'teaspoons': 'teaspoon',
+        'ml': 'milliliter', 'l': 'liter',
+        'g': 'gram', 'kg': 'kilogram',
+        'cup': 'cup', 'cups': 'cup',
+        'pinch': 'pinch', 'dash': 'dash',
+        'oz': 'ounce', 'lb': 'pound'
+    }
+
+    # Split into parts
+    parts = re.split(r'(\d+[/.]?\d*|\s+)', measure_str)
+    parts = [p.strip() for p in parts if p.strip()]
+
+    if not parts:
+        return "", "", measure_str
+
+    # Extract quantity (first numeric part)
+    quantity = ""
+    remaining_parts = []
+    for i, part in enumerate(parts):
+        if re.match(r'^\d+[/.]?\d*$', part):
+            quantity = part
+            remaining_parts = parts[i + 1:]
+            break
+        else:
+            remaining_parts.append(part)
+
+    if not remaining_parts:
+        return quantity, "", ""
+
+    # Check if the first remaining part is a known unit
+    unit = ""
+    item_parts = remaining_parts
+
+    # Try to match known units
+    for abbrev, full_unit in unit_mapping.items():
+        # Check if any part matches a unit (abbreviation or full)
+        for i, part in enumerate(remaining_parts):
+            if part.lower() == abbrev or part.lower() == full_unit:
+                unit = full_unit
+                item_parts = remaining_parts[:i] + remaining_parts[i + 1:]
+                break
+        if unit:
+            break
+
+    # If no unit found and quantity exists, consider first word as item
+    if not unit and quantity:
+        if len(remaining_parts) > 1:
+            # Check if first word looks like a unit (plural/singular forms)
+            first_word = remaining_parts[0].lower()
+            if first_word.endswith('s') and first_word[:-1] in unit_mapping.values():
+                unit = first_word[:-1]  # Remove 's' to get singular form
+                item_parts = remaining_parts[1:]
+            else:
+                # No unit found, treat everything as item
+                item_parts = remaining_parts
+        else:
+            # Only one word remaining, treat as item
+            item_parts = remaining_parts
+
+    item = " ".join(item_parts).strip()
+
+    # Special case: if the entire string was a quantity (like "200ml")
+    if not item and unit and quantity:
+        item = unit
+        unit = ""
+
+    return quantity, unit, item
 
 
 
@@ -254,9 +315,50 @@ import re
 
 def highlight_actions(instruction_text):
     """Wrap action verbs in <action> tags"""
-    action_verbs = ["chop", "mix", "stir", "heat", "preheat", "bake", "fry",
-                    "whisk", "boil", "simmer", "dice", "slice", "grate",
-                    "pour", "add", "season", "cook", "beat", "fold"]
+    action_verbs = [
+        # Heat-related
+        "preheat", "heat", "reheat", "warm", "toast", "bake", "broil", "grill",
+        "roast", "sear", "fry", "deep-fry", "pan-fry", "saute", "sizzle",
+        "simmer", "boil", "steam", "poach", "blanch", "scald", "reduce",
+
+        # Mixing/Prep
+        "mix", "stir", "whisk", "beat", "fold", "blend", "combine", "knead",
+        "massage", "toss", "shake", "whip", "cream", "emulsify",
+
+        # Cutting
+        "chop", "dice", "mince", "slice", "cut", "julienne", "cube", "shred",
+        "grate", "peel", "zest", "segment", "trim", "butterfly", "fillet",
+
+        # Adding
+        "add", "pour", "drizzle", "sprinkle", "dust", "coat", "layer", "top",
+        "garnish", "decorate", "stuff", "fill", "insert", "inject",
+
+        # Cooking processes
+        "cook", "caramelize", "glaze", "reduce", "thicken", "reduce",
+        "render", "smoke", "infuse", "steep", "marinate", "brine", "cure",
+        "ferment", "proof", "rise", "rest", "chill", "freeze", "thaw",
+
+        # Specific actions
+        "season", "salt", "pepper", "flavor", "spice", "rub", "brush", "glaze",
+        "baste", "drain", "strain", "sieve", "filter", "press", "mash", "puree",
+        "blitz", "process", "grind", "crush", "pound", "tenderize", "juice",
+
+        # Serving
+        "plate", "serve", "portion", "divide", "share", "arrange", "present",
+
+        # Special techniques
+        "flambe", "sous-vide", "temper", "clarify", "deglaze", "reduce",
+        "thicken", "bind", "emulsify", "aerate", "fold", "laminate",
+
+        # From your recipes
+        "spray", "shred", "steam", "cover", "remove", "reserve", "break",
+        "congratulate", "pick", "rinse", "drain", "set", "bloom", "blend",
+        "taste", "crush", "tear", "thicken", "store", "keep", "wait", "go",
+        "settle", "jog", "place", "transfer", "check", "cool", "assemble",
+        "trim", "crimp", "bring", "allow", "sit", "melt", "form", "flatten",
+        "char", "repeat", "carefully", "lightly", "spread", "finish", "wait",
+        "gently", "return", "let", "enjoy"
+    ]
 
     # Create regex pattern that matches whole words only
     pattern = re.compile(r'\b(' + '|'.join(action_verbs) + r')\b', re.IGNORECASE)
@@ -283,16 +385,16 @@ def export_to_xml(db_file, xml_file):
         ET.SubElement(recipe_elem, "id").text = recipe[0]
         ET.SubElement(recipe_elem, "title").text = recipe[1]
 
-        # Ingredients with separated quantity/unit
+        # Ingredients with separated quantity/unit/item
         ingredients_elem = ET.SubElement(recipe_elem, "ingredients")
         for ingredient_line in recipe[2].split(","):
             ingredient_line = ingredient_line.strip()
             if ingredient_line:
                 ingredient_elem = ET.SubElement(ingredients_elem, "ingredient")
-                quantity, unit = parse_measurement(ingredient_line)
+                quantity, unit, item = parse_measurement(ingredient_line)  # Changed to unpack 3 values
                 ET.SubElement(ingredient_elem, "quantity").text = quantity
                 ET.SubElement(ingredient_elem, "unit").text = unit
-                ET.SubElement(ingredient_elem, "item").text = ingredient_line.replace(f"{quantity} {unit}", "").strip()
+                ET.SubElement(ingredient_elem, "item").text = item
 
         # Instructions with highlighted actions
         instructions_elem = ET.SubElement(recipe_elem, "instructions")

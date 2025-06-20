@@ -4,7 +4,14 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="be450ff8-420e-455b-85da-adff6bcef621" name="Changes" comment="Initial commit 1" />
+    <list default="true" id="be450ff8-420e-455b-85da-adff6bcef621" name="Changes" comment="workspace.xml changes">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/limited_themealdb_recipes_20250620.json" beforeDir="false" afterPath="$PROJECT_DIR$/limited_themealdb_recipes_20250620.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/recipes.db" beforeDir="false" afterPath="$PROJECT_DIR$/recipes.db" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/recipes.html" beforeDir="false" afterPath="$PROJECT_DIR$/recipes.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/recipes.xml" beforeDir="false" afterPath="$PROJECT_DIR$/recipes.xml" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -20,6 +27,12 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
+  "lastFilter": {
+    "state": "OPEN",
+    "assignee": "abijith611"
+  }
+}]]></component>
   <component name="GithubPullRequestsUISettings"><![CDATA[{
   "selectedUrlAndAccountId": {
     "url": "https://github.com/abijith611/TextTech",
@@ -95,7 +108,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1750280393900</updated>
-      <workItem from="1750280395476" duration="10838000" />
+      <workItem from="1750280395476" duration="14995000" />
     </task>
     <task id="LOCAL-00001" summary="Initial commit">
       <option name="closed" value="true" />
@@ -113,18 +126,38 @@
       <option name="project" value="LOCAL" />
       <updated>1750420294476</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="workspace.xml changes">
+      <option name="closed" value="true" />
+      <created>1750420597651</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1750420597651</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
   </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Initial commit" />
     <MESSAGE value="Initial commit 1" />
-    <option name="LAST_COMMIT_MESSAGE" value="Initial commit 1" />
+    <MESSAGE value="workspace.xml changes" />
+    <option name="LAST_COMMIT_MESSAGE" value="workspace.xml changes" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/TextTech$main.coverage" NAME="main Coverage Results" MODIFIED="1750376574324" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/TextTech$main.coverage" NAME="main Coverage Results" MODIFIED="1750424516295" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>
