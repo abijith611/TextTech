@@ -143,26 +143,14 @@ def create_table(conn):
     try:
         cursor = conn.cursor()
         cursor.execute("""
-                       CREATE TABLE IF NOT EXISTS recipes
-                       (
-                           id
-                           TEXT
-                           PRIMARY
-                           KEY,
-                           title
-                           TEXT
-                           NOT
-                           NULL,
-                           ingredients
-                           TEXT
-                           NOT
-                           NULL,
-                           instructions
-                           TEXT
-                           NOT
-                           NULL
-                       )
-                       """)
+            CREATE TABLE IF NOT EXISTS recipes (
+                id TEXT PRIMARY KEY,
+                title TEXT NOT NULL,
+                ingredients TEXT NOT NULL,
+                instructions TEXT NOT NULL,
+                calories REAL
+            )
+        """)
         conn.commit()
         print("Created 'recipes' table")
     except Error as e:
@@ -194,25 +182,28 @@ def parse_ingredients(recipe_data):
 
 def insert_recipe(conn, recipe_data):
     """Insert recipe data into the database"""
-    sql = """INSERT OR REPLACE INTO recipes(id, title, ingredients, instructions)
-              VALUES(?,?,?,?)"""
+    ingredients = parse_ingredients(recipe_data)
+    calories = calculate_calories(ingredients)
+
+    sql = """INSERT OR REPLACE INTO recipes(id, title, ingredients, instructions, calories)
+              VALUES(?,?,?,?,?)"""
     try:
         cursor = conn.cursor()
         cursor.execute(sql, (
             recipe_data['idMeal'],
             recipe_data['strMeal'],
-            parse_ingredients(recipe_data),
-            recipe_data['strInstructions']
+            ingredients,
+            recipe_data['strInstructions'],
+            calories
         ))
         conn.commit()
-        print(f"Inserted recipe: {recipe_data['strMeal']}")
+        print(f"Inserted recipe: {recipe_data['strMeal']} (Calories: {calories})")
         return cursor.lastrowid
     except Error as e:
         print(f"Error inserting recipe {recipe_data['idMeal']}: {e}")
     return None
 
 import xml.etree.ElementTree as ET
-from fractions import Fraction
 
 
 def parse_measurement(measure_str):
@@ -368,6 +359,7 @@ def export_to_xml(db_file, xml_file):
         recipe_elem = ET.SubElement(root, "recipe")
         ET.SubElement(recipe_elem, "id").text = recipe[0]
         ET.SubElement(recipe_elem, "title").text = recipe[1]
+        ET.SubElement(recipe_elem, "calories").text = str(recipe[4])  # Add calories
 
         # Ingredients with separated quantity/unit/item
         ingredients_elem = ET.SubElement(recipe_elem, "ingredients")
@@ -411,6 +403,54 @@ def transform_to_html(xml_file, xslt_file, output_html):
         print(f"Successfully created HTML page at {output_html}")
     except Exception as e:
         print(f"Error transforming XML to HTML: {e}")
+
+import urllib.parse
+import time
+
+
+def calculate_calories(ingredients_str):
+    """Calculate calories by querying each ingredient separately"""
+    if not ingredients_str:
+        return "N/A"
+
+    # Split into individual ingredients (comma-separated)
+    ingredients = [ing.strip() for ing in ingredients_str.split(",") if ing.strip()]
+    if not ingredients:
+        return "N/A"
+
+    total_calories = 0
+    failed_queries = 0
+    api_key = "hDQLYashT6x+0JXeW/MNjQ==uj9EubnJF1h6QTbG"
+
+    for ingredient in ingredients:
+        try:
+            url = f"https://api.calorieninjas.com/v1/nutrition?query={urllib.parse.quote(ingredient)}"
+            headers = {"X-Api-Key": api_key} if api_key != "YOUR_API_KEY" else {}
+
+            response = requests.get(url, headers=headers)
+            if response.status_code == 200:
+                items = response.json().get("items", [])
+                if items:
+                    total_calories += sum(item["calories"] for item in items)
+                else:
+                    failed_queries += 1
+            else:
+                print(f"API error for '{ingredient}': {response.text}")
+                failed_queries += 1
+
+            # Be gentle with the free API
+            time.sleep(0.5 if not api_key else 0.1)
+
+        except Exception as e:
+            print(f"Error processing '{ingredient}': {str(e)}")
+            failed_queries += 1
+
+    # Return results based on success rate
+    if failed_queries == len(ingredients):
+        return "N/A (all queries failed)"
+    elif failed_queries > 0:
+        return f"{round(total_calories)}"
+    return round(total_calories)
 
 # Add this at the end of your __main__ block:
 if __name__ == "__main__":

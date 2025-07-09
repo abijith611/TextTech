@@ -77,7 +77,7 @@
     <xsl:for-each select="recipes/recipe">
         <div class="recipe">
             <h2 class="recipe-title"><xsl:value-of select="title"/></h2>
-
+            <h3>Calories: <xsl:value-of select="calories"/></h3>
             <div class="ingredients">
                 <h3>Ingredients</h3>
                 <ul>
