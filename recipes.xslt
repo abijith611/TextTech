@@ -99,13 +99,14 @@
     }
 
     #searchInput {
-        width: 96.5%;
+        width: 100%;
         background: white;
         border-radius: 8px;
         box-shadow: 0 3px 10px rgba(0,0,0,0.1);
         margin-bottom: 30px;
         padding: 20px;
         overflow: hidden;
+        box-sizing: border-box;
     }
 
     /* Fully responsive adjustments */
