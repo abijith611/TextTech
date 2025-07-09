@@ -148,7 +148,11 @@ def create_table(conn):
                 title TEXT NOT NULL,
                 ingredients TEXT NOT NULL,
                 instructions TEXT NOT NULL,
-                calories REAL
+                calories REAL,
+                image_url TEXT,
+                thumbnail_url TEXT,
+                video_url TEXT,
+                tags TEXT  # Comma-separated tags for additional metadata
             )
         """)
         conn.commit()
@@ -185,8 +189,10 @@ def insert_recipe(conn, recipe_data):
     ingredients = parse_ingredients(recipe_data)
     calories = calculate_calories(ingredients)
 
-    sql = """INSERT OR REPLACE INTO recipes(id, title, ingredients, instructions, calories)
-              VALUES(?,?,?,?,?)"""
+    sql = """INSERT OR REPLACE INTO recipes(
+                id, title, ingredients, instructions, 
+                calories, image_url, thumbnail_url, video_url, tags
+              ) VALUES(?,?,?,?,?,?,?,?,?)"""
     try:
         cursor = conn.cursor()
         cursor.execute(sql, (
@@ -194,7 +200,15 @@ def insert_recipe(conn, recipe_data):
             recipe_data['strMeal'],
             ingredients,
             recipe_data['strInstructions'],
-            calories
+            calories,
+            recipe_data.get('strMealThumb', ''),
+            recipe_data.get('strMealThumb', ''),
+            recipe_data.get('strYoutube', ''),
+            ','.join(filter(None, [
+                recipe_data.get('strArea', ''),
+                recipe_data.get('strCategory', ''),
+                recipe_data.get('strTags', '')
+            ]))
         ))
         conn.commit()
         print(f"Inserted recipe: {recipe_data['strMeal']} (Calories: {calories})")
@@ -360,6 +374,10 @@ def export_to_xml(db_file, xml_file):
         ET.SubElement(recipe_elem, "id").text = recipe[0]
         ET.SubElement(recipe_elem, "title").text = recipe[1]
         ET.SubElement(recipe_elem, "calories").text = str(recipe[4])  # Add calories
+        ET.SubElement(recipe_elem, "image_url").text = recipe[5]
+        # Only add video_url to XML if it's not empty
+        if recipe[7]:  # Check if video_url is not empty
+            ET.SubElement(recipe_elem, "video_url").text = recipe[7]
 
         # Ingredients with separated quantity/unit/item
         ingredients_elem = ET.SubElement(recipe_elem, "ingredients")
