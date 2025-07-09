@@ -98,6 +98,16 @@
         flex: 1 1 300px;
     }
 
+    #searchInput {
+        width: 96.5%;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        margin-bottom: 30px;
+        padding: 20px;
+        overflow: hidden;
+    }
+
     /* Fully responsive adjustments */
     @media (max-width: 768px) {
         body {
@@ -109,30 +119,46 @@
         .media-row {
             flex-direction: column;
         }
+        #searchInput {
+            font-size: 14px;
+            padding: 10px;
+        }
     }
     </style>
 </head>
 <body>
-    <h1>Recipe Collection</h1>
-    <xsl:for-each select="recipes/recipe">
-        <div class="recipe">
-            <h2 class="recipe-title"><xsl:value-of select="title"/></h2>
-            <h3>Calories: <xsl:value-of select="calories"/></h3>
-    <xsl:if test="image_url">
-        <div class="image-container">
-            <img src="{image_url}" alt="{title}" class="recipe-image"/>
-        </div>
-    </xsl:if>
-    <xsl:if test="video_url and video_url != ''">
-        <div class="video-container">
-            <iframe
-                src="{concat('https://www.youtube.com/embed/', substring-after(video_url, 'v='))}"
-                frameborder="0"
-                allowfullscreen="true"/>
-        </div>
-    </xsl:if>
+    <h1>Recipe Enrichment</h1>
+    <!-- …inside your <body>, right after the <h1>… -->
+<input
+  type="text"
+  id="searchInput"
+  placeholder="Search for a recipe…"
+  onkeyup="filterRecipes()"
+/>
 
-            <div class="ingredients">
+<div id="recipesList">
+  <xsl:for-each select="recipes/recipe">
+    <div class="recipe">
+      <h2 class="recipe-title"><xsl:value-of select="title"/></h2>
+      <h3>Calories: <xsl:value-of select="calories"/></h3>
+
+      <xsl:if test="image_url">
+        <div class="image-container">
+          <img src="{image_url}" alt="{title}" class="recipe-image"/>
+        </div>
+      </xsl:if>
+
+      <xsl:if test="video_url and string-length(normalize-space(video_url)) &gt; 0">
+        <div class="video-container">
+          <iframe
+            src="{concat('https://www.youtube.com/embed/', substring-after(video_url, 'v='))}"
+            frameborder="0"
+            allowfullscreen="true">
+          </iframe>
+        </div>
+      </xsl:if>
+
+                  <div class="ingredients">
                 <h3>Ingredients</h3>
                 <ul>
                     <xsl:for-each select="ingredients/ingredient">
@@ -151,8 +177,25 @@
                 <h3>Instructions</h3>
                 <xsl:value-of select="instructions" disable-output-escaping="yes"/>
             </div>
-        </div>
-    </xsl:for-each>
+    </div>
+  </xsl:for-each>
+</div>
+
+<script type="text/javascript"><![CDATA[
+function filterRecipes() {
+    var filter = document.getElementById('searchInput').value.toLowerCase();
+    document
+      .querySelectorAll('#recipesList .recipe')
+      .forEach(function(recipe){
+        var title = recipe.querySelector('.recipe-title')
+                          .textContent
+                          .toLowerCase();
+        recipe.style.display = title.indexOf(filter) !== -1 ? '' : 'none';
+      });
+}
+]]></script>
+
+
 </body>
 </html>
 </xsl:template>
