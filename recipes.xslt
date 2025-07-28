@@ -109,6 +109,13 @@
         box-sizing: border-box;
     }
 
+        action {
+            background-color: #ffeaa7;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+
     /* Fully responsive adjustments */
     @media (max-width: 768px) {
         body {
