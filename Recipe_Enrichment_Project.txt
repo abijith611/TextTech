@@ -4,4 +4,3 @@ The generated HTML output file for the project is also hosted live at: https://a
 
 Please refer to the README.md file within the repository for all project details, setup instructions, and usage guide.
 
-replace this key in config.py - CALORIENINJAS_API_KEY = "hDQLYashT6x+0JXeW/MNjQ==uj9EubnJF1h6QTbG"
