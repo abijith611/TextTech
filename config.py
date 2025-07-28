@@ -5,7 +5,7 @@ MEALDB_API_BASE_URL = "https://www.themealdb.com/api/json/v1/1/"
 CALORIENINJAS_API_URL = "https://api.calorieninjas.com/v1/nutrition"
 
 # API Keys (Replace "YOUR_API_KEY" with your actual key if needed)
-CALORIENINJAS_API_KEY = "hDQLYashT6x+0JXeW/MNjQ==uj9EubnJF1h6QTbG"
+CALORIENINJAS_API_KEY = ""
 
 # Data Limits for Fetching
 CATEGORIES_LIMIT = 5

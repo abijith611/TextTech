@@ -1,0 +1,7 @@
+This is the GitHub repository for the project: https://github.com/abijith611/TextTech/
+
+The generated HTML output file for the project is also hosted live at: https://abijith611.github.io/
+
+Please refer to the README.md file within the repository for all project details, setup instructions, and usage guide.
+
+replace this key in config.py - CALORIENINJAS_API_KEY = "hDQLYashT6x+0JXeW/MNjQ==uj9EubnJF1h6QTbG"
